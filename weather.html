@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather App</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: white;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      color: #222;
+    }
+
+    .emoji {
+      font-size: 60px;
+      margin-top: 20px;
+    }
+
+    h1 {
+      font-size: 36px;
+      color: #1877f2;
+      margin: 10px 0;
+    }
+
+    h2 {
+      font-size: 30px;
+      color: #1877f2;
+      margin-bottom: 10px;
+    }
+
+    .temp {
+      font-size: 28px;
+      margin-bottom: 30px;
+    }
+
+.forecast {
+  margin: 25px 30px; 
+  font-size: 22px;
+  padding: 10px 10px; 
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.forecast:hover {
+  background-color: #f2f2f2;
+}
+
+.forecast span {
+  display: block;
+  margin-top: 5px;
+  color: #555;
+}
+    button {
+      font-size: 18px;
+      padding: 10px 26px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      margin-top: 30px;
+      transition: all 0.3s ease;
+    } 
+    
+    #changeCity {
+      background-color: #1877f2;
+      color: #fff;
+      border: 1px solid #1877f2;
+    }
+
+    #changeCity:hover {
+      background-color: #f3f3f3;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #444;
+    }
+
+    /* --- Dialog Box --- */
+    .dialog-container {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      width: 85%;
+      max-width: 330px;
+      display: none;
+      font-size: 16px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translate(-50%, 10px);}
+      to {opacity: 1; transform: translate(-50%, 0);}
+    }
+
+    .dialog-header {
+      text-align: right;
+      font-weight: bold;
+      padding: 15px 15px 5px;
+      color: #222;
+    }
+
+    .dialog-body {
+      padding: 10px 20px 15px;
+      text-align: left;
+    }
+
+    .dialog-question {
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .dialog-freeinput {
+      width: 100%;
+      min-height: 24px;
+      font-size: 15px;
+      outline: none;
+      border: none;
+      background: transparent;
+      color: #222;
+    }
+
+    .dialog-buttons {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid transparent;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      padding-top: 6px;
+    }
+
+   /* Narrow border between buttons */
+    .dialog-buttons::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 15%;
+      right: 15%;
+      height: 1px;
+      background-color: rgba(0,0,0,0.15);
+    }
+
+    .divider {
+      width: 1px;
+      height: 20px;
+      background-color: rgba(0,0,0,0.15);
+    }
+
+    .dialog-buttons button {
+      background: none;
+      color: #000;
+      font-size: 17px;
+      border: none;
+      cursor: pointer;
+      width: 50%;
+      padding: 10px 0;
+      transition: background-color 0.2s ease;
+    }
+
+    .dialog-buttons button:hover {
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <div class="emoji" id="emoji">🌤</div>
+  <h1>Currently 21° in</h1>
+  <h2 id="city">Tokyo</h2>
+  <div class="temp"><span style="font-weight:300;">13°</span> / <span style="font-weight:bold;">23°</span></div>
+
+  <div class="forecast">🌧 <b>Tomorrow</b><span>10° / 22°</span></div>
+  <div class="forecast">⛅ <b>Saturday</b><span>15° / 17°</span></div>
+  <div class="forecast">☀️ <b>Sunday</b><span>25° / 28°</span></div>
+
+  <button id="changeCity">Change city</button>
+
+  <div class="footer">Coded by Hamida Sadat</div>
+
+  <!-- Dialog Box -->
+  <div class="dialog-container" id="dialogBox">
+    <div class="dialog-header">www.sadat.io Says</div>
+    <div class="dialog-body">
+      <div class="dialog-question" id="dialogQuestion">What city do you live in?</div>
+      <div class="dialog-freeinput" id="dialogInput" contenteditable="true"></div>
+    </div>
+    <div class="dialog-buttons">
+      <button id="cancelBtn">Cancel</button>
+      <div class="divider"></div>
+      <button id="okBtn">OK</button>
+    </div>
+  </div>
+<script>
+const changeBtn = document.getElementById("changeCity");
+const dialogBox = document.getElementById("dialogBox");
+const okBtn = document.getElementById("okBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+const emoji = document.getElementById("emoji");
+const cityName = document.getElementById("city");
+const question = document.getElementById("dialogQuestion");
+const input = document.getElementById("dialogInput");
+
+let step = 1;
+let userCity = "";
+
+changeBtn.addEventListener("click", () => {
+  step = 1;
+  question.textContent = "What city do you live in?";
+  input.textContent = ""; 
+  dialogBox.style.display = "block";
+  input.focus();
+});
+
+okBtn.addEventListener("click", () => {
+  if (step === 1) {
+    userCity = input.textContent.trim() || "Unknown city";
+    cityName.textContent = userCity;
+
+    step = 2;
+    question.textContent = "What temperature is it?";
+    input.textContent = "";
+    input.focus();
+
+  } else {
+    let temp = parseFloat(input.textContent.trim()) || 0;
+
+    
+    document.querySelector("h1").textContent = `Currently ${temp}° in ${userCity}`;
+
+    // ایموجی‌ها
+    if (temp >= 30) {
+      emoji.textContent = "🔥";
+    } else if (temp >= 15) {
+      emoji.textContent = "😄";
+    } else if (temp >= 0) {
+      emoji.textContent = "🙂";
+    } else if (temp >= -10) {
+      emoji.textContent = "🥶";
+    } else {
+      emoji.textContent = "☹️";
+    }
+
+    dialogBox.style.display = "none";
+  }
+});
+
+cancelBtn.addEventListener("click", () => {
+  dialogBox.style.display = "none";
+});
+</script>
+
+</body>
+</html>
